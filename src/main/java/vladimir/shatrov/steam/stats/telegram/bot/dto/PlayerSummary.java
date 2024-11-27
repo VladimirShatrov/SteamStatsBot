@@ -15,7 +15,7 @@ public record PlayerSummary(
         PersonaState personastate,
         int communityvisibilitystate,
         boolean profilestate,
-        Date lastlogoff,
+        long lastlogoff,
         boolean commentpermission
 ) {
 }

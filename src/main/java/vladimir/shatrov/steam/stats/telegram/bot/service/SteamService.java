@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import vladimir.shatrov.steam.stats.telegram.bot.dto.FriendListResponse;
 import vladimir.shatrov.steam.stats.telegram.bot.dto.PlayerSummary;
 import vladimir.shatrov.steam.stats.telegram.bot.dto.PlayerSummaryResponse;
 
@@ -64,14 +65,14 @@ public class SteamService {
         }
     }
 
-    public String getFriendList (String steamId) {
+    public FriendListResponse getFriendList (String steamId) {
         String url = UriComponentsBuilder.fromUriString(BASE_URL + "ISteamUser/GetFriendList/v0001/")
                 .queryParam("key", API_KEY)
                 .queryParam("steamid", steamId)
                 .queryParam("relationship", "friend")
                 .toUriString();
         try {
-            return restTemplate.getForObject(url, String.class);
+            return restTemplate.getForObject(url, FriendListResponse.class);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

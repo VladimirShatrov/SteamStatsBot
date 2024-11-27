@@ -8,8 +8,12 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import vladimir.shatrov.steam.stats.telegram.bot.dto.FriendListResponse;
 import vladimir.shatrov.steam.stats.telegram.bot.dto.PlayerSummary;
 import vladimir.shatrov.steam.stats.telegram.bot.service.SteamService;
+
+import java.util.Date;
+import java.util.List;
 
 @Component
 public class SteamBot extends TelegramLongPollingBot {
@@ -57,9 +61,12 @@ public class SteamBot extends TelegramLongPollingBot {
 
                     if (steamId != null) {
                         PlayerSummary data = steamService.getPlayerSummary(steamId);
-                        String text = data.steamid() + "\n" + data.personaname() + "\n" +
-                                data.avatar() + "\n" + data.profileurl() + "\n" + data.lastlogoff() + "\n" +
-                                data.profilestate() + "\n" + data.personastate();
+                        Date date = new Date((long)data.lastlogoff() * 1000);
+                        String text = "Имя пользователя: " + data.personaname() + "\n" +
+                                "Аватарка пользователя: " + data.avatar() + "\n" +
+                                "Профиль пользователя: " + data.profileurl() + "\n" +
+                                "Онлайн: " + date.toString() + "\n" +
+                                "Статус: " + data.personastate();
                         message.setText(text);
                     }
                     else {
@@ -76,7 +83,20 @@ public class SteamBot extends TelegramLongPollingBot {
                     }
 
                     if (steamId != null) {
-                        message.setText(steamService.getFriendList(steamId));
+                        List<FriendListResponse.Friend> friends = steamService.getFriendList(steamId).getFriendslist().getFriends();
+                        if (friends.isEmpty()) {
+                            message.setText("У пользователя нет друзей.");
+                        }
+                        else {
+                            StringBuilder text = new StringBuilder();
+                            for (FriendListResponse.Friend friend: friends
+                                 ) {
+                                text.append(steamService.getPlayerSummary(friend.getSteamid()).personaname()).append(" ");
+                                Date date = new Date((long)friend.getFriendSince() * 1000);
+                                text.append(date.toString()).append("\n");
+                            }
+                            message.setText(text.toString());
+                        }
                     }
                     else {
                         message.setText("Пользователь не найден.");

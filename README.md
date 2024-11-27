@@ -25,5 +25,15 @@
 ### Шаг 1: Клонирование репозитория
 
 ```bash
-git clone https://github.com/your-username/steam-stats-telegram-bot.git
-cd steam-stats-telegram-bot
+git clone https://github.com/VladimirShatrov/SteamStatsBot.git
+```
+### Шаг 2: Настройка Spring Boot
+
+Убедитесь, что у вас установлен JDK 11 или выше. Для установки зависимостей используйте Maven.
+Откройте файл application.properties или application.yaml и укажите ваш Telegram Bot Token и Bot Name:
+
+```editorconfig
+bot.token=YOUR_BOT_TOKEN
+bot.name=YOUR_BOT_NAME
+```
+
