@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import vladimir.shatrov.steam.stats.telegram.bot.dto.FriendListResponse;
+import vladimir.shatrov.steam.stats.telegram.bot.dto.PlayerAchievements;
 import vladimir.shatrov.steam.stats.telegram.bot.dto.PlayerSummary;
 import vladimir.shatrov.steam.stats.telegram.bot.dto.PlayerSummaryResponse;
 
@@ -73,6 +74,22 @@ public class SteamService {
                 .toUriString();
         try {
             return restTemplate.getForObject(url, FriendListResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public PlayerAchievements getPlayerAchievements (String steamId, String appId) {
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "ISteamUserStats/GetPlayerAchievements/v0001/")
+                .queryParam("appid", appId)
+                .queryParam("key", API_KEY)
+                .queryParam("steamid", steamId)
+                .queryParam("I", "russian")
+                .toUriString();
+
+        try {
+            return restTemplate.getForObject(url, PlayerAchievements.class);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

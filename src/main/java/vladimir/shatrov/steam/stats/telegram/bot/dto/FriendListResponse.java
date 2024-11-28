@@ -2,6 +2,7 @@ package vladimir.shatrov.steam.stats.telegram.bot.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.time.Instant;
 import java.util.List;
 
 public class FriendListResponse {
@@ -29,7 +30,7 @@ public class FriendListResponse {
         private String relationship;
 
         @JsonProperty("friend_since")
-        private long friendSince;
+        private Instant friendSince;
 
         public String getSteamid() {
             return steamid;
@@ -39,7 +40,7 @@ public class FriendListResponse {
             return relationship;
         }
 
-        public long getFriendSince() {
+        public Instant getFriendSince() {
             return friendSince;
         }
     }

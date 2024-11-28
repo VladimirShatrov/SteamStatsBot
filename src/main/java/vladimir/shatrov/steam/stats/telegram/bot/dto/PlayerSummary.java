@@ -2,6 +2,7 @@ package vladimir.shatrov.steam.stats.telegram.bot.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import java.time.Instant;
 import java.util.Date;
 
 @JsonSerialize
@@ -15,7 +16,7 @@ public record PlayerSummary(
         PersonaState personastate,
         int communityvisibilitystate,
         boolean profilestate,
-        long lastlogoff,
+        Instant lastlogoff,
         boolean commentpermission
 ) {
 }

@@ -9,6 +9,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import vladimir.shatrov.steam.stats.telegram.bot.dto.FriendListResponse;
+import vladimir.shatrov.steam.stats.telegram.bot.dto.PlayerAchievements;
 import vladimir.shatrov.steam.stats.telegram.bot.dto.PlayerSummary;
 import vladimir.shatrov.steam.stats.telegram.bot.service.SteamService;
 
@@ -24,7 +25,7 @@ public class SteamBot extends TelegramLongPollingBot {
     @Value("${bot.token}")
     private String botToken;
 
-    private SteamService steamService;
+    private final SteamService steamService;
 
     public SteamBot(SteamService steamService) {
         this.steamService = steamService;
@@ -61,11 +62,10 @@ public class SteamBot extends TelegramLongPollingBot {
 
                     if (steamId != null) {
                         PlayerSummary data = steamService.getPlayerSummary(steamId);
-                        Date date = new Date((long)data.lastlogoff() * 1000);
                         String text = "Имя пользователя: " + data.personaname() + "\n" +
                                 "Аватарка пользователя: " + data.avatar() + "\n" +
                                 "Профиль пользователя: " + data.profileurl() + "\n" +
-                                "Онлайн: " + date.toString() + "\n" +
+                                "Онлайн: " + data.lastlogoff() + "\n" +
                                 "Статус: " + data.personastate();
                         message.setText(text);
                     }
@@ -88,18 +88,42 @@ public class SteamBot extends TelegramLongPollingBot {
                             message.setText("У пользователя нет друзей.");
                         }
                         else {
-                            StringBuilder text = new StringBuilder();
+                            String text = "";
                             for (FriendListResponse.Friend friend: friends
                                  ) {
-                                text.append(steamService.getPlayerSummary(friend.getSteamid()).personaname()).append(" ");
-                                Date date = new Date((long)friend.getFriendSince() * 1000);
-                                text.append(date.toString()).append("\n");
+                                text += steamService.getPlayerSummary(friend.getSteamid()).personaname() + ": " + friend.getFriendSince() + "\n";
                             }
-                            message.setText(text.toString());
+                            message.setText(text);
                         }
                     }
                     else {
                         message.setText("Пользователь не найден.");
+                    }
+                }
+            }
+            if (userInput.startsWith("/getAchievements")) {
+                String input = userInput.replace("/getAchievements", "");
+                String appid = input.substring(0, input.indexOf(" ", 2)).trim();
+                String steamId = input.substring(input.indexOf(appid) + appid.length()).trim();
+
+                if (!appid.isEmpty() && !steamId.isEmpty()) {
+                    if (!steamId.matches("\\d+")) {
+                        steamId = steamService.resolveVanityURL(steamId);
+                    }
+
+                    if (steamId != null) {
+                        PlayerAchievements achievements = steamService.getPlayerAchievements(steamId, appid);
+                            String text = "";
+                            for (PlayerAchievements.PlayerStats.Achievement achievement: achievements.getPlayerStats().getAchievements()
+                                 ) {
+                                if (achievement.isAchieved()) {
+                                    text += achievement.getApiname() + "\n" + achievement.getUnlocktime() + "\n";
+                                }
+                            }
+                            if (text.isEmpty()) {
+                                text = "У пользователя нет достижений в этой игре.";
+                            }
+                            message.setText(text);
                     }
                 }
             }
@@ -108,8 +132,6 @@ public class SteamBot extends TelegramLongPollingBot {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
         }
     }
 }
